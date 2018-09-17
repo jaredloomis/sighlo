@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <vector>
 #include "table.h"
@@ -6,15 +7,23 @@
 
 int main(int argc, char** argv) {
     // Create table
-    Table table("./test.db");
+    Table table;
+    std::ifstream ifile;
+    ifile.open("./test.db");
+    ifile >> table;
+    ifile.close();
+    std::ofstream ofile;
+    ofile.open("./test.db");
+
+    std::cout << "PARSED:\n" << table << "\n\n";
 
     // Insert
     std::vector<Identifier> ids;
     for(size_t i = 0; i < 12; ++i) {
-        StringEntity* entity = new StringEntity("MY STRING ENTITY " + std::to_string(i));
+        StringEntity* entity = new StringEntity("User #" + std::to_string(i));
         auto id = table.insert(entity);
         ids.push_back(id);
-        std::cout << "ID" << i << ": " << id << std::endl;
+        std::cout << "Inserted " << id << std::endl;
     }
 
     // Retrieve (get)
@@ -30,6 +39,8 @@ int main(int argc, char** argv) {
     for(size_t i = 0; i < results.size(); ++i) {
         std::cout << *results[i].second << std::endl;
     }
+
+    ofile << table;
 
     return 0;
 }

@@ -19,8 +19,9 @@ class Table {
     std::map<Identifier, Entity*> entries;
     std::vector<std::string> log;
 
+    Table() {}
+
     Table(std::string path) {
-        file.open(path);
     }
 
     ~Table() {
@@ -39,7 +40,7 @@ class Table {
         return id;
     }
 
-    std::vector<std::pair<Identifier, Entity*>> search(bool (*pred)(Identifier, Entity*)) {
+    std::vector<std::pair<Identifier, Entity*>> search(bool (*pred)(Identifier, Entity*)) const {
         std::vector<std::pair<Identifier, Entity*>> ret;
         auto all = list();
         for(size_t i = 0; i < all.size(); ++i) {
@@ -67,6 +68,7 @@ class Table {
     }
 
     std::optional<Entity*> get_disk(Identifier id) const {
+        
         return std::nullopt;
     }
 
@@ -81,5 +83,28 @@ class Table {
         return std::to_string(rand());
     }
 };
+
+std::ostream& operator<<(std::ostream& os, const Table& table) {
+    auto entities = table.list();
+    for(size_t i = 0; i < entities.size(); ++i) {
+        os << *entities[i].second << "\n";
+    }
+    return os;
+}
+
+std::istream& operator>>(std::istream& is, Table& table) {
+    Entity* entity;
+    do {
+        entity = new Entity();
+        is >> *entity;
+        if(entity->type != EntityType::NIL) {
+            table.insert(entity);
+        } else {
+            delete entity;
+        }
+    } while(entity->type != EntityType::NIL);
+
+    return is;
+}
 
 #endif // _TABLE_H
