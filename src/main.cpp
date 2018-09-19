@@ -4,6 +4,26 @@
 #include <vector>
 #include "table.h"
 #include "entity.h"
+#include "repl.h"
+
+int main() {
+    // Create table
+    Table table;
+    std::ifstream ifile;
+    ifile.open("./test.db");
+    ifile >> table;
+    ifile.close();
+
+    bool active = true;
+    while(active) {
+        active = read_eval_print(table);
+    }
+
+    // Save db to file
+    std::ofstream ofile;
+    ofile.open("./test.db");
+    ofile << table;
+}
 
 int main2() {
     std::ifstream ifile;
@@ -14,7 +34,7 @@ int main2() {
     return 0;
 }
 
-int main(int argc, char** argv) {
+int main1(int argc, char** argv) {
     // Create table
     Table table;
     std::ifstream ifile;
