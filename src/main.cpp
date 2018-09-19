@@ -5,6 +5,15 @@
 #include "table.h"
 #include "entity.h"
 
+int main2() {
+    std::ifstream ifile;
+    ifile.open("./test.db");
+    Entity* fuck = read_entity(ifile).value();
+    //ifile >> e;
+    std::cout << *fuck << std::endl;
+    return 0;
+}
+
 int main(int argc, char** argv) {
     // Create table
     Table table;
@@ -12,10 +21,11 @@ int main(int argc, char** argv) {
     ifile.open("./test.db");
     ifile >> table;
     ifile.close();
-    std::ofstream ofile;
-    ofile.open("./test.db");
 
     std::cout << "PARSED:\n" << table << "\n\n";
+
+    std::ofstream ofile;
+    ofile.open("./test.db");
 
     // Insert
     std::vector<Identifier> ids;
@@ -25,11 +35,12 @@ int main(int argc, char** argv) {
         ids.push_back(id);
         std::cout << "Inserted " << id << std::endl;
     }
+    std::cout << std::endl;
 
     // Retrieve (get)
     Entity def = StringEntity("nothing");
     Entity* ret = table.get(ids[0]).value_or(&def);
-    std::cout << "Get: " << *ret << std::endl;
+    std::cout << "Get: " << *ret << std::endl << std::endl;
 
     // Search
     auto results = table.search([](Identifier id, Entity* entity) {  

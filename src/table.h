@@ -9,6 +9,7 @@
 #include <string>
 #include <optional>
 #include <cstdlib>
+#include <memory>
 #include "entity.h"
 
 typedef std::string Identifier;
@@ -21,8 +22,7 @@ class Table {
 
     Table() {}
 
-    Table(std::string path) {
-    }
+    Table(std::string path) {}
 
     ~Table() {
         file.close();
@@ -68,7 +68,6 @@ class Table {
     }
 
     std::optional<Entity*> get_disk(Identifier id) const {
-        
         return std::nullopt;
     }
 
@@ -93,17 +92,41 @@ std::ostream& operator<<(std::ostream& os, const Table& table) {
 }
 
 std::istream& operator>>(std::istream& is, Table& table) {
-    Entity* entity;
+    Entity* entity = nullptr;
+    do {
+        auto e = read_entity(is);
+        if(e.has_value()) {
+            entity = e.value();
+
+            char leftover[2];
+            while(leftover[0] != '\n') {
+                is.read(leftover, 1);
+            }
+
+            if(entity->type != EntityType::NIL) {
+                table.insert(entity);
+            } else {
+                delete entity;
+            }
+        }
+    } while(entity != nullptr && entity->type != EntityType::NIL && is.tellg() != -1);
+    /*
     do {
         entity = new Entity();
-        is >> *entity;
+        char ty[3];
+        is.readsome(ty, 3);
+        if(std::string(ty) == "STR") {
+            StringEntity* ret = new StringEntity();
+            ret->read(is);
+            entity = ret;
+        }
+
         if(entity->type != EntityType::NIL) {
             table.insert(entity);
         } else {
             delete entity;
         }
-    } while(entity->type != EntityType::NIL);
-
+    } while(entity->type != EntityType::NIL && is.tellg() != -1);*/
     return is;
 }
 

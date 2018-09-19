@@ -2,6 +2,8 @@
 #define _ENTITY_H
 
 #include <iostream>
+#include <optional>
+#include <memory>
 
 enum class EntityType {
     NIL, STRING, LIST, HASH
@@ -62,15 +64,30 @@ std::ostream& operator<<(std::ostream& os, const Entity& entity) {
     return entity.write(os);
 }
 
+/*
+ * This operator should only be used when
+ */
 std::istream& operator>>(std::istream& is, Entity& entity) {
     char ty[3];
-    is.readsome(ty, 3);
+    is.get(ty, 3);
     if(std::string(ty) == "STR") {
         StringEntity ret;
         ret.read(is);
         entity = ret;
     }
     return is;
+}
+
+std::optional<Entity*> read_entity(std::istream& is) {
+    char ty[4];
+    is.get(ty, 4);
+    if(std::string(ty) == "STR") {
+        StringEntity* ret = new StringEntity();
+        ret->read(is);
+        return ret;
+    } else {
+        return {};
+    }
 }
 
 #endif // _ENTITY_H
