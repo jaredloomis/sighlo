@@ -14,9 +14,10 @@ int main() {
     ifile >> table;
     ifile.close();
 
+    auto repl   = Repl();
     bool active = true;
     while(active) {
-        active = read_eval_print(table);
+        active = repl.read_eval_print(table);
     }
 
     // Save db to file
