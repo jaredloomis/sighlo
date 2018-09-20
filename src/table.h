@@ -12,32 +12,21 @@
 #include <memory>
 #include "entity.h"
 
-typedef std::string Identifier;
-
 class Table {
   public:
-    std::ofstream file;
     std::map<Identifier, Entity*> entries;
     std::vector<std::string> log;
 
     Table() {}
 
-    Table(std::string path) {}
-
     ~Table() {
-        file.close();
         for(std::map<Identifier, Entity*>::iterator it = entries.begin(); it != entries.end(); ++it)
             delete it->second;
     }
 
-    Identifier insert(Entity* entity) {
-        // Generate ID
-        Identifier id = generateID();
-        // Insert in-memory
-        entries[id] = entity;
-        // Insert into file
-        file << *entity;
-        return id;
+    bool insert(Entity* entity) {
+        entries[entity->id] = entity;
+        return true;
     }
 
     std::vector<std::pair<Identifier, Entity*>> search(bool (*pred)(Identifier, Entity*)) const {
@@ -86,7 +75,9 @@ class Table {
 std::ostream& operator<<(std::ostream& os, const Table& table) {
     auto entities = table.list();
     for(size_t i = 0; i < entities.size(); ++i) {
-        os << *entities[i].second << "\n";
+        entities[i].second->write(os);
+        os << "\n";
+        //os << *entities[i].second << "\n";
     }
     return os;
 }
@@ -98,35 +89,22 @@ std::istream& operator>>(std::istream& is, Table& table) {
         if(e.has_value()) {
             entity = e.value();
 
+            /*
             char leftover[2];
             while(leftover[0] != '\n') {
                 is.read(leftover, 1);
-            }
+            }*/
 
             if(entity->type != EntityType::NIL) {
+                std::cout << "Inserting entity " << *((StringEntity*) entity) << std::endl;
                 table.insert(entity);
             } else {
+                std::cout << "Read invalid entity" << std::endl;
                 delete entity;
             }
         }
     } while(entity != nullptr && entity->type != EntityType::NIL && is.tellg() != -1);
-    /*
-    do {
-        entity = new Entity();
-        char ty[3];
-        is.readsome(ty, 3);
-        if(std::string(ty) == "STR") {
-            StringEntity* ret = new StringEntity();
-            ret->read(is);
-            entity = ret;
-        }
-
-        if(entity->type != EntityType::NIL) {
-            table.insert(entity);
-        } else {
-            delete entity;
-        }
-    } while(entity->type != EntityType::NIL && is.tellg() != -1);*/
+    std::cout << (entity != nullptr) << (entity->type != EntityType::NIL) << (is.tellg() != -1) << std::endl;
     return is;
 }
 

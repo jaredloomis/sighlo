@@ -9,7 +9,7 @@
 
 class Repl {
   private:
-    static std::vector<std::string> tokenize(std::string statement) {
+    static std::vector<std::string> tokenize(const std::string& statement) {
         std::vector<std::string> ret;
 
         long last_space = -1;
@@ -27,7 +27,7 @@ class Repl {
     }
 
   public:
-    bool read_eval_print(const Table& table) {
+    bool read_eval_print(Table& table) {
         std::cout << "> ";
         char command_raw[256];
         std::cin.getline(command_raw, 256);
@@ -38,16 +38,26 @@ class Repl {
             auto id = tokens[1];
             auto m_entity = table.get(id);
             if(m_entity.has_value()) {
-                std::cout << *m_entity.value() << std::endl;
+                m_entity.value()->write(std::cout) << std::endl;
             } else {
                 std::cout << "No entity found with id " + id << std::endl;
             }
         } else if(tokens[0] == "list") {
             auto entities = table.list();
+            std::cout << table.entries.size() << " entries:" << std::endl;
             for(size_t i = 0; i < entities.size(); ++i) {
                 auto entity = entities[i];
-                std::cout << entity.first << ": " << *entity.second << std::endl;
+                std::cout << entity.first << ": ";
+                entity.second->write(std::cout) << std::endl;
             }
+        } else if(tokens[0] == "insert") {
+            std::string entity_str;
+            for(size_t i = 1; i < tokens.size(); ++i) {
+                entity_str += tokens[i];
+            }
+            StringEntity* entity = new StringEntity(entity_str);
+            bool status = table.insert(entity);
+            std::cout << "id: " << entity->id << std::endl;
         } else if(tokens[0] == "quit") {
             return false;
         } else {

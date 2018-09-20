@@ -14,10 +14,19 @@ int main() {
     ifile >> table;
     ifile.close();
 
-    auto repl   = Repl();
+    // REPL
+    Repl repl   = Repl();
     bool active = true;
+    try {
     while(active) {
         active = repl.read_eval_print(table);
+    }
+    } catch(std::exception ex) {
+
+    // Save db to file
+    std::ofstream ofile;
+    ofile.open("./test.db");
+    ofile << table;
     }
 
     // Save db to file
@@ -26,6 +35,7 @@ int main() {
     ofile << table;
 }
 
+/*
 int main2() {
     std::ifstream ifile;
     ifile.open("./test.db");
@@ -75,4 +85,4 @@ int main1(int argc, char** argv) {
     ofile << table;
 
     return 0;
-}
+}*/
