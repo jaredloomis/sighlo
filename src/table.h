@@ -77,7 +77,6 @@ std::ostream& operator<<(std::ostream& os, const Table& table) {
     for(size_t i = 0; i < entities.size(); ++i) {
         entities[i].second->write(os);
         os << "\n";
-        //os << *entities[i].second << "\n";
     }
     return os;
 }
@@ -89,22 +88,13 @@ std::istream& operator>>(std::istream& is, Table& table) {
         if(e.has_value()) {
             entity = e.value();
 
-            /*
-            char leftover[2];
-            while(leftover[0] != '\n') {
-                is.read(leftover, 1);
-            }*/
-
             if(entity->type != EntityType::NIL) {
-                std::cout << "Inserting entity " << *((StringEntity*) entity) << std::endl;
                 table.insert(entity);
             } else {
-                std::cout << "Read invalid entity" << std::endl;
                 delete entity;
             }
         }
     } while(entity != nullptr && entity->type != EntityType::NIL && is.tellg() != -1);
-    std::cout << (entity != nullptr) << (entity->type != EntityType::NIL) << (is.tellg() != -1) << std::endl;
     return is;
 }
 

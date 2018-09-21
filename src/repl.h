@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <stdint.h>
+#include <sstream>
 #include "table.h"
 
 class Repl {
@@ -34,11 +35,13 @@ class Repl {
         auto command = std::string(command_raw);
         auto tokens = tokenize(command);
 
-        if(tokens[0] == "get") {
+        if(tokens.size() == 0) {
+            return true;
+        } else if(tokens[0] == "get") {
             auto id = tokens[1];
             auto m_entity = table.get(id);
             if(m_entity.has_value()) {
-                m_entity.value()->write(std::cout) << std::endl;
+                m_entity.value()->print(std::cout) << std::endl;
             } else {
                 std::cout << "No entity found with id " + id << std::endl;
             }
@@ -48,16 +51,22 @@ class Repl {
             for(size_t i = 0; i < entities.size(); ++i) {
                 auto entity = entities[i];
                 std::cout << entity.first << ": ";
-                entity.second->write(std::cout) << std::endl;
+                entity.second->print(std::cout) << std::endl;
             }
         } else if(tokens[0] == "insert") {
             std::string entity_str;
             for(size_t i = 1; i < tokens.size(); ++i) {
                 entity_str += tokens[i];
             }
-            StringEntity* entity = new StringEntity(entity_str);
-            bool status = table.insert(entity);
-            std::cout << "id: " << entity->id << std::endl;
+            auto stream = std::istringstream(entity_str);
+            auto m_entity = read_entity(stream);
+            if(m_entity.has_value()) {
+                auto entity = m_entity.value();
+                bool status = table.insert(entity);
+                std::cout << "id: " << entity->id << std::endl;
+            } else {
+                std::cout << "Invalid entity" << std::endl;
+            }
         } else if(tokens[0] == "quit") {
             return false;
         } else {
